@@ -4,7 +4,7 @@
 
 
 /// 定义变量和变量的访问器。
-#define VAR( VarType, VarName)\
+#define VAR(VarType, VarName)\
     private: VarType VarName; /*var itself*/\
     public: VarType const& get_##VarName() const&  { return VarName; } /* const getter*/\
     VarType& get_##VarName()& {return VarName;} /* mutable getter */ \

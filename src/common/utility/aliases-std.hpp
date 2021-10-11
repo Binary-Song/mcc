@@ -5,6 +5,7 @@
 #include <string>
 #include <string_view>
 #include <set>
+#include <memory>
 namespace mcc_utilites {
 
     // classes
@@ -24,6 +25,11 @@ namespace mcc_utilites {
 
     template<class Element>
     using Set = std::set<Element>;
+
+    using Path = std::filesystem::path;
+
+    template<class T>
+    using SharedPtr = std::shared_ptr<T>;
 
     // functions 
     using std::tie; 

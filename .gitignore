@@ -3,6 +3,7 @@
 .vscode/
 build/
 output/
+runspace/
 
 # MacOS Cache
 .DS_Store

@@ -4,20 +4,22 @@
 #include <boost/range/adaptor/indexed.hpp>
 
 #include "common/precompiled.hpp"
+#include "common/utility/functions/string_to_int.hpp"
 
 namespace mcc {
 
     struct Token
     {
+        
+#ifndef NDEBUG
+        String name;
+#endif
         int id;
         String lexeme;
         int line;
         int column;
         std::vector<String> submatches;
 
-#ifndef NDEBUG
-        String name;
-#endif
 
         Token(int id = -1, String lexeme = "", int line = 0, int column = 0, std::vector<String> submatches = {})
         {
@@ -44,14 +46,24 @@ namespace mcc {
                 this->column = column;
             }
 
-            String Message() const
+            String what() const
             {
                 return fmt::format("Unknown character at line {}, column {}.", line, column);
             }
         };
 
         VAR(TYPE(Vector<Tuple<String, Regex>>), patterns);
-        VAR(TYPE(Set<String>), ignored_tokens);
+        VAR(TYPE(Set<String>), ignored_tokens); 
+
+        int to_id(String const& name) const
+        {
+            return id_map.at(name);
+        }
+
+        String to_name(int id) const
+        {
+            return name_map.at(id);
+        }
 
         /// 词法分析
         /// @exception NoMatchException 无法与任何规则匹配。
@@ -65,12 +77,11 @@ namespace mcc {
 
             int line = 1, col = 1;
             // 遍历字符
-            for (auto&& current = begin; current != end; ++current) {
+            auto current = begin;
+            while (current != end) {
                 // 缓存 token id到名称的映射
-                Map<String, int> ids = get_token_ids();
-#ifndef NDEBUG
-                Map<int, String> names = get_token_names();
-#endif  
+                update_id_map(); 
+                update_name_map(); 
                 // 遍历规则
                 bool found_matching_pattern = false;
                 for (auto&& [token_name, regex] : patterns) {
@@ -80,13 +91,13 @@ namespace mcc {
                         auto match_begin = matches[0].first;
                         auto match_end = matches[0].second;
 
-                        int id = ids[token_name];
+                        int id = to_id(token_name);
                         auto lexeme = String(match_begin, match_end);
 
                         if (!ignored_tokens.count(token_name)) {
                             Token token = Token(id, lexeme, line, col);
 #ifndef NDEBUG
-                            token.name = names[id];
+                            token.name = token_name;
 #endif  
                             for (int i = 1; i < matches.size(); i++) {
                                 token.submatches.push_back(String(matches[i].first, matches[i].second));
@@ -94,12 +105,14 @@ namespace mcc {
                             tokens.push_back(token);
                         }
 
+                        // 维护循环不变条件
                         if (lexeme.find('\n') != -1) {
                             line++;
-                            col = 0;
+                            col = 1;
                         } else {
                             col += lexeme.size();
                         }
+                        current = match_end;
                         found_matching_pattern = true;
                         break; // 从遍历规则中break出去
                     }
@@ -112,7 +125,7 @@ namespace mcc {
             return tokens;
         }
 
-        auto get_token_ids() const -> Map<String, int>
+        void update_id_map()
         {
             Map<String, int> map;
             for (auto&& [name, _] : patterns) {
@@ -120,10 +133,10 @@ namespace mcc {
                     map[name] = (int) map.size();
                 }
             }
-            return map;
+            id_map = map;
         }
 
-        auto get_token_names() const -> Map<int, String>
+        void update_name_map()
         {
             Map<int, String> map;
             Set<String> set;
@@ -133,8 +146,12 @@ namespace mcc {
                     set.insert(name);
                 }
             }
-            return map;
+            name_map = map;
         }
+
+    private:
+        Map<String, int> id_map;
+        Map<int, String> name_map;
     };
 }
 
