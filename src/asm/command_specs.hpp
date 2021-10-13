@@ -3,17 +3,17 @@
 #include "asm/error.hpp"
 #include <array>
 namespace mcc {
-
-
-
+    
+    class Command;
     class CommandSpecs
     {
     public:
 
         SharedPtr<Map<String, int>> addr_map;
         std::array<bool, 8> bits;
-
-
+        std::array<bool, 8> data_bits;
+        bool has_data = false;
+ 
         virtual int size() const = 0;
         virtual void to_binary(Command const& cmd) = 0;
         virtual ~CommandSpecs() {}
@@ -23,6 +23,17 @@ namespace mcc {
             unsigned char byte = 0;
             int offset = 0;
             for (auto&& bit : bits) {
+                byte += (bit << offset);
+                offset++;
+            }
+            return byte;
+        }
+
+        unsigned char data() const
+        {
+            unsigned char byte = 0;
+            int offset = 0;
+            for (auto&& bit : data_bits) {
                 byte += (bit << offset);
                 offset++;
             }
@@ -42,61 +53,45 @@ namespace mcc {
         };
 
 
-        void set_bits(char c)
+        void set_bits(unsigned char c)
         {
             for (auto&& bit : bits) {
                 bit = c % 2;
                 c /= 2;
             }
         }
-
-        void set_register_selection_bits(Command const& cmd,RegBitsOptions opt = RegBitsOptions())
+        
+        void set_data_bits(unsigned char c)
         {
-            int src_reg_num = -1;
-
-            auto get_reg_num = [](String const& reg_name) {
-                if (reg_name == "r0" || reg_name == "R0") {
-                    return 0;
-                } else if (reg_name == "r1" || reg_name == "R1") {
-                    return 1;
-                } else if (reg_name == "r2" || reg_name == "R2") {
-                    return 2;
-                } else if (reg_name == "r3" || reg_name == "R3") {
-                    return 3;
-                } else {
-                    return -1;
-                }
-            };
-
-            // dest reg
-            if (!opt.ignore_dest) {
-                if (cmd.args.size() >= opt.dest_arg_index + 1) {
-                    int reg_i = get_reg_num(cmd.args[opt.dest_arg_index]);
-                    if (reg_i != -1) {
-                        bits[2] = reg_i % 2;
-                        bits[3] = reg_i / 2;
-                    } else if(opt.require_dest){
-                        throw TranslationError("Rd required.");
-                    }
-                } else if(opt.require_dest) {
-                    throw TranslationError("Rd required.");
-                }
-            }
-
-            // src reg
-            if (!opt.ignore_src) {
-                if (cmd.args.size() >= 2) {
-                    int reg_i = get_reg_num(cmd.args[1]);
-                    if (reg_i != -1) {
-                        bits[0] = reg_i % 2;
-                        bits[1] = reg_i / 2;
-                    } else if(opt.require_dest){
-                        throw TranslationError("Rs required.");
-                    }
-                } else if(opt.require_src) {
-                    throw TranslationError("Rs required.");
-                }
+            for (auto&& bit: data_bits) {
+                bit = c % 2;
+                c /= 2;
             }
         }
+
+        void and_mask_bits(unsigned char mask)
+        {
+            char bits = mask & byte();
+            set_bits(bits);
+        }
+
+        void or_mask_bits(unsigned char mask)
+        {
+            char bits = mask | byte();
+            set_bits(bits);
+        }
+
+        void set_addressing_mode_bits(bool direct_mode)
+        {
+            if (!direct_mode) {
+                // indirect mode 
+                this->and_mask_bits(0xFE);
+            }else{
+                // direct mode 
+                this->or_mask_bits(0x01);
+            }
+        }
+
+        void set_register_selection_bits(Command const& cmd, RegBitsOptions opt = RegBitsOptions());
     };
 } // namespace mcc

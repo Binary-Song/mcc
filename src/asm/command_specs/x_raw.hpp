@@ -12,17 +12,6 @@ namespace mcc {
             return 1;
         }
 
-        void to_binary(Command const& cmd) override
-        {
-            try
-            {
-                this->set_bits(char(string_to_int(cmd.args[0]))); 
-                set_register_selection_bits(cmd);
-            }
-            catch(ConversionError const& e)
-            {
-                throw TranslationError("Raw data not valid");
-            }
-        }
+        void to_binary(Command const& cmd) override;
     };
 } // namespace mcc

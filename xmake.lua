@@ -11,7 +11,7 @@ end
 
 if is_plat("windows") then 
     add_cxxflags("/utf-8","/Zc:__cplusplus" ) -- MSVC 专属 flags
-end 
+end
 
 set_languages("cxx17")
 set_warnings("all")

@@ -8,4 +8,6 @@
 #include "asm/command_specs/9_ld.hpp"
 #include "asm/command_specs/10_st.hpp"
 #include "asm/command_specs/11_bzc.hpp"
+#include "asm/command_specs/12_ldrom.hpp"
+
 #include "asm/command_specs/x_raw.hpp"

@@ -56,6 +56,7 @@ int main(int argc, char** argv)
             errprint.fit(code);
             Frontend frontend;
             auto tokens = frontend.scan(code);
+            auto addr_map = frontend.solve_address(frontend.tokenizer, tokens);
             auto commands = frontend.parse(frontend.tokenizer, tokens);
             Backend backend(output);
             backend.generate(commands);

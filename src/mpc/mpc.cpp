@@ -11,6 +11,11 @@
 #include "mpc/frontend.hpp"
 #include "mpc/backend.hpp"
 
+#ifndef NDEBUG
+constexpr bool always_regen = true;
+#else 
+constexpr bool always_regen = false;
+#endif
 
 int main(int argc, char** argv)
 {
@@ -20,9 +25,9 @@ int main(int argc, char** argv)
           {String(token_address), Regex{"((0[box])?[0-9A-Fa-f]+):"}},
           {String(token_property), Regex{"[a-zA-Z_][a-zA-Z_0-9]+=[+-]?(0[box])?[0-9A-Fa-f]+"}},
           {String(token_flag), Regex{"[a-zA-Z_][a-zA-Z_0-9]+"}},
-          {String(token_separator), Regex{"(#|;).*\n"}},
-          {String(token_separator), Regex{"\n"}},
-          {String(token_space), Regex{"\\s+"}},
+          {String(token_separator), Regex{R"((#|;)[^\n]*\n)"}},
+          {String(token_separator), Regex{R"(\n)"}},
+          {String(token_space), Regex{R"(\s)"}},
     };
 
     if (argc < 2) {
@@ -54,7 +59,7 @@ int main(int argc, char** argv)
         String status;
 
         Hasher hash;
-        if (this_hash != last_hash) {
+        if (this_hash != last_hash || always_regen) {
             status = "regenerated";
             errprint.fit(code);
             auto tokenizer = Tokenizer().set_patterns(patterns).set_ignored_tokens({ token_space });

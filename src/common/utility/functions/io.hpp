@@ -47,7 +47,7 @@ namespace mcc_utilites {
         }
     };
 
-    std::string file_to_string(std::filesystem::path path)
+    inline std::string file_to_string(std::filesystem::path path)
     {
         std::ifstream stream;
         stream.exceptions(stream.failbit | stream.badbit);
@@ -61,7 +61,7 @@ namespace mcc_utilites {
         return "";
     }
 
-    std::string file_to_string_with_fallback(std::filesystem::path path, std::string fallback) noexcept
+   inline std::string file_to_string_with_fallback(std::filesystem::path path, std::string fallback) noexcept
     {
         try {
             return file_to_string(path);
@@ -72,7 +72,7 @@ namespace mcc_utilites {
         return fallback;
     }
 
-    void overwrite_file(std::string str, std::filesystem::path path)
+   inline void overwrite_file(std::string str, std::filesystem::path path)
     {
         std::ofstream stream;
         stream.exceptions(stream.failbit | stream.badbit);

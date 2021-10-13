@@ -177,17 +177,10 @@ namespace mcc {
             for (auto&& cmd : commands) {
                 // default flags: rjmp=1
                 bitset.set_bit(mapping["ABS_REL"], 1);
-                // foreach flag
-                for (auto&& flag : cmd.flags) {
-                    if (mapping.has_key(flag)) {
-                        bitset.set_bit(mapping[flag]);
-                    } else if (flag == "pass") {
-                        if (cmd.flags.size() != 1) {
-                            throw SyntaxError("Cannot specify other flags when `pass` is specified");
-                        }
-                        // do nothing when `pass` specified
-                    } else if (boost::starts_with(flag, "rjmp=") || boost::starts_with(flag, "ajmp=")) {
-                        int to = std::stoi(flag.substr(5, -1));
+                // foreach property
+                for (auto&& prop : cmd.props) {
+                    if (prop.key == "ajmp") {
+                        int to = string_to_int(prop.value);   
                         int j[4];
                         for (int i = 0; i < 4; i++) {
                             j[i] = to % 2;
@@ -197,13 +190,30 @@ namespace mcc {
                         bitset.set_bit(mapping["J1"], j[1]);
                         bitset.set_bit(mapping["J2"], j[2]);
                         bitset.set_bit(mapping["J3"], j[3]);
-                        bitset.set_bit(mapping["ABS_REL"], boost::starts_with(flag, "rjmp=") ? 1 : 0);
-                    } else if (flag == "ajmp") {
-                        bitset.set_bit(mapping["J0"], 0);
-                        bitset.set_bit(mapping["J1"], 0);
-                        bitset.set_bit(mapping["J2"], 0);
-                        bitset.set_bit(mapping["J3"], 0);
                         bitset.set_bit(mapping["ABS_REL"], 0);
+                    } else if (prop.key == "rjmp") {
+                        int to = string_to_int(prop.value);   
+                        int j[4];
+                        for (int i = 0; i < 4; i++) {
+                            j[i] = to % 2;
+                            to /= 2;
+                        }
+                        bitset.set_bit(mapping["J0"], j[0]);
+                        bitset.set_bit(mapping["J1"], j[1]);
+                        bitset.set_bit(mapping["J2"], j[2]);
+                        bitset.set_bit(mapping["J3"], j[3]);
+                        bitset.set_bit(mapping["ABS_REL"], 1);
+                    }
+                }
+                // foreach flag
+                for (auto&& flag : cmd.flags) {
+                    if (mapping.has_key(flag)) {
+                        bitset.set_bit(mapping[flag]);
+                    } else if (flag == "pass") {
+                        if (cmd.flags.size() != 1) {
+                            throw SyntaxError("Cannot specify other flags when `pass` is specified");
+                        }
+                        // do nothing when `pass` specified
                     } else {
                         throw SyntaxError("Unknown flag `" + flag + "`.");
                     }

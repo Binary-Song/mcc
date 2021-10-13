@@ -2,7 +2,7 @@
 #include "common/precompiled.hpp"
 #include "asm/command_specs.hpp"
 namespace mcc {
-    class CommandLoad : public CommandSpecs
+    class CommandLoadRom : public CommandSpecs
     {
     public:
         int size() const override

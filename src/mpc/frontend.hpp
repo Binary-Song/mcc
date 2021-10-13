@@ -38,12 +38,20 @@ namespace mcc {
 
         Command() = default;
 
-        Command(std::vector<Token> const& flag_tokens, int row)
+        Command(std::vector<Token> const& flag_tokens,std::vector<Token> const& prop_tokens, int row)
         {
             for (auto&& flag_token : flag_tokens) {
                 this->flags.push_back(flag_token.lexeme);
                 this->line = flag_token.line;
                 this->column = flag_token.column;
+            }
+            for (auto&& prop_token : prop_tokens) {
+                auto equal = std::find(prop_token.lexeme.begin(),prop_token.lexeme.end(), '=');
+                std::string key(prop_token.lexeme.begin(), equal);
+                std::string val(equal + 1, prop_token.lexeme.end()); 
+                this->props.push_back(Property(key, val));
+                this->line = prop_token.line;
+                this->column = prop_token.column;
             }
             this->row = row;
             this->line = line;
@@ -95,9 +103,10 @@ namespace mcc {
                         throw CommandAddressConflict(token.line, token.column, row_number);
                     } else {
                         row_numbers.insert(row_number);
-                        commands.push_back(Command(flag_tokens, row_number));
+                        commands.push_back(Command(flag_tokens,prop_tokens, row_number));
                         row_number++;
                         flag_tokens.clear();
+                        prop_tokens.clear();
                     }
                 }
             }

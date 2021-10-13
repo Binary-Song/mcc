@@ -6,7 +6,10 @@
 #include "common/precompiled.hpp"
 #include "common/utility/functions/string_to_int.hpp"
 
+
+
 namespace mcc {
+ 
 
     struct Token
     {
@@ -19,7 +22,7 @@ namespace mcc {
         int line;
         int column;
         std::vector<String> submatches;
-
+      
 
         Token(int id = -1, String lexeme = "", int line = 0, int column = 0, std::vector<String> submatches = {})
         {
@@ -27,7 +30,7 @@ namespace mcc {
             this->lexeme = lexeme;
             this->line = line;
             this->column = column;
-            this->submatches = std::move(submatches);
+            this->submatches = std::move(submatches); 
         }
     };
 
