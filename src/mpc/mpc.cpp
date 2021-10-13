@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     };
 
     if (argc < 2) {
-        std::cerr << "Usage: mpc <path> [-o <dir>]\n";
+        std::cerr << "Usage: mpc <src> [-o <dir>]\n";
         return 1;
     }
 
@@ -88,6 +88,9 @@ int main(int argc, char** argv)
     }
     catch (CommandAddressConflict const& e) {
         errprint.print_error(e.what(), input.string(), code, e.line);
+    }
+    catch (SyntaxError const& e) {
+        errprint.print_error(e.what(),input.string(),code, e.line);
     }
     return 0;
 }

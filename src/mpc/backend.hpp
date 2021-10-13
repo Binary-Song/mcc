@@ -137,10 +137,12 @@ namespace mcc {
     struct SyntaxError
     {
         String why;
+        int line = -1;
 
-        SyntaxError(String why = "")
+        SyntaxError(String why = "", int line = -1)
         {
             this->why = why;
+            this->line = line;
         }
 
         String what() const
@@ -175,13 +177,17 @@ namespace mcc {
             write_manifest_header();
             int row = 0;
             for (auto&& cmd : commands) {
-                // default flags: rjmp=1
+                // 默认ABS_REL = 1
                 bitset.set_bit(mapping["ABS_REL"], 1);
-                // foreach property
+                // 遍历属性
                 for (auto&& prop : cmd.props) {
+                    // 处理ajmp和rjmp属性
+                    // 例如 rjmp=3
+                    // 则应该设置 ABS_REL = 1, J3-J0 = 0011
                     if (prop.key == "ajmp") {
                         int to = string_to_int(prop.value);   
                         int j[4];
+                        // 转二进制
                         for (int i = 0; i < 4; i++) {
                             j[i] = to % 2;
                             to /= 2;
@@ -205,21 +211,21 @@ namespace mcc {
                         bitset.set_bit(mapping["ABS_REL"], 1);
                     }
                 }
-                // foreach flag
+                // 遍历 flag
                 for (auto&& flag : cmd.flags) {
                     if (mapping.has_key(flag)) {
                         bitset.set_bit(mapping[flag]);
                     } else if (flag == "pass") {
                         if (cmd.flags.size() != 1) {
-                            throw SyntaxError("Cannot specify other flags when `pass` is specified");
+                            throw SyntaxError("Cannot specify other flags when `pass` is specified", cmd.line);
                         }
                         // do nothing when `pass` specified
                     } else {
-                        throw SyntaxError("Unknown flag `" + flag + "`.");
+                        throw SyntaxError("Unknown flag `" + flag + "`.", cmd.line);
                     }
                 }
                 if (cmd.row < row) {
-                    throw SyntaxError("Row number should be monotonically increasing.");
+                    throw SyntaxError("Row number should be monotonically increasing.", cmd.line);
                 }
                 while (cmd.row > row) {
                     write_empty_command_to_file();
