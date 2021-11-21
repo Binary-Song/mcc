@@ -13,9 +13,11 @@ namespace mcc {
         bool is_indirect_mode = cmd.command.back() == '&';
         this->set_addressing_mode_bits(!is_indirect_mode);
 
+        this->set_storage_device_bit(this->use_ram);
+
         unsigned int dest = string_to_int(cmd.args[0]);
         this->set_data_bits(dest);
 
-        this->has_data = true;
+        this->has_data = true; 
     }
 }

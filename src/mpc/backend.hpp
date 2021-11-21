@@ -44,7 +44,7 @@ namespace mcc {
             {"ALU_O",11},
             {"DR_O",12},
             {"RD_O",13},
-            {"ER_O",14},
+            {"UPD",14},
 
             {"DR_I",15},
 

@@ -9,5 +9,5 @@
 #include "asm/command_specs/10_st.hpp"
 #include "asm/command_specs/11_bzc.hpp"
 #include "asm/command_specs/12_ldrom.hpp"
-
+#include "asm/command_specs/13_jmp.hpp"
 #include "asm/command_specs/x_raw.hpp"

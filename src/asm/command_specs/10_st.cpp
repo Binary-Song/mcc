@@ -4,7 +4,7 @@ namespace mcc {
     void CommandStore::to_binary(Command const& cmd) 
     { 
         if (cmd.args.size() != 2) {
-            throw TranslationError("st requires 1 argument");
+            throw TranslationError("st requires 2 argument");
         }
 
         this->set_bits(0xA0);

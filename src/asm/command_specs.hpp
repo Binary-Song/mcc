@@ -85,10 +85,19 @@ namespace mcc {
         {
             if (!direct_mode) {
                 // indirect mode 
-                this->and_mask_bits(0xFE);
+                this->and_mask_bits(0xFE); // set 0
             }else{
                 // direct mode 
-                this->or_mask_bits(0x01);
+                this->or_mask_bits(0x01); // set 1
+            }
+        }
+
+        void set_storage_device_bit(bool use_ram)
+        {
+            if (use_ram) { 
+                this->and_mask_bits(0xFD); // set 0
+            } else{ 
+                this->or_mask_bits(0x02);// set 1
             }
         }
 

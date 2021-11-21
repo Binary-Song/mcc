@@ -1,13 +1,13 @@
-#include "9_ld.hpp"
+#include "13_jmp.hpp"
 #include "asm/frontend.hpp"
 namespace mcc {
-    void CommandLoad::to_binary(Command const& cmd)    
+    void CommandJump::to_binary(Command const& cmd) 
     {
-        if (cmd.args.size() != 2) {
-            throw TranslationError("ld requires 2 arguments");
+        if (cmd.args.size() != 1) {
+            throw TranslationError("bzc requires 1 argument");
         }
 
-        this->set_bits(0x90);
+        this->set_bits(0xC0);
         this->set_register_selection_bits(cmd);
  
         bool is_indirect_mode = cmd.command.back() == '&';
@@ -15,9 +15,9 @@ namespace mcc {
 
         this->set_storage_device_bit(this->use_ram);
 
-        unsigned int dest = string_to_int(cmd.args[1]);
+        unsigned int dest = string_to_int(cmd.args[0]);
         this->set_data_bits(dest);
 
-        this->has_data = true;
+        this->has_data = true; 
     }
 }
